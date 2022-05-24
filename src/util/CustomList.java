@@ -1,11 +1,9 @@
 package util;
 
-import type.Task;
+import tasks.Task;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class CustomList<T> {
 

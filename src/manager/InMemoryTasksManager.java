@@ -1,26 +1,25 @@
 package manager;
 
-import type.Epic;
-import type.Subtask;
-import type.Task;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryTasksManager implements Manager {
-    HashMap<Integer, Task> tasks = new HashMap<>();
-    InMemoryHistoryManager memoryHistory = new InMemoryHistoryManager();
-
+    public static HashMap<Integer, Task> tasks = new HashMap<>();
+    public static List<Task> memoryTasks = new ArrayList<>();
+    public static InMemoryHistoryManager memoryHistory = new InMemoryHistoryManager();
+    public static TreeSet<Task> sortedTasks = new TreeSet<>();
     //    Получение списка всех задач.
     @Override
     public List<Task> getAllTask() {
         ArrayList<Task> taskList = new ArrayList<>();
         for (Task value : tasks.values()) {
-            if (!(value instanceof Epic) && !(value instanceof Subtask)) {
+            if (!(value instanceof Epic)) {
                 taskList.add(value);
+                sortedTasks.add(value);
             }
         }
         return taskList;
@@ -37,7 +36,15 @@ public class InMemoryTasksManager implements Manager {
         }
         return taskList;
     }
-
+    public List<Task> getAllSubtaskWithoutEpic() {
+        ArrayList<Task> subtaskList = new ArrayList<>();
+        for (Task value : tasks.values()) {
+            if (value instanceof Subtask) {
+                subtaskList.add(value);
+            }
+        }
+        return subtaskList;
+    }
     //    Получение списка всех подзадач определённого эпика.
     @Override
     public List<Subtask> getAllSubtask(Epic epic) {
@@ -59,14 +66,35 @@ public class InMemoryTasksManager implements Manager {
     }
 
     //    Добавление новой задачи, эпика и подзадачи. Сам объект должен передаваться в качестве параметра.
+    //    Добавил проверку на пересечения
     @Override
     public void addTask(Task task) {
+        for (Task sortedTask : sortedTasks) {
+            if(sortedTask.getStartTime().isBefore(task.getStartTime())
+                    && sortedTask.getEndDate().isAfter(task.getStartTime())
+             || sortedTask.getStartTime().isBefore(task.getEndDate())
+                    && sortedTask.getEndDate().isAfter(task.getEndDate())) {
+                System.out.println("Обнаружены пересечения, задача не была добавлена");
+                return;
+            }
+        }
         tasks.put(task.getId(), task);
+        memoryTasks.add(task);
     }
 
     //    Обновление задачи любого типа по идентификатору. Новая версия объекта передаётся в виде параметра.
+    //    Добавил проверку на пересечения
     @Override
     public void refreshTask(int id, Task task) {
+        for (Task sortedTask : sortedTasks) {
+            if(sortedTask.getStartTime().isBefore(task.getStartTime())
+                    && sortedTask.getEndDate().isAfter(task.getStartTime())
+                    || sortedTask.getStartTime().isBefore(task.getEndDate())
+                    && sortedTask.getEndDate().isAfter(task.getEndDate())) {
+                System.out.println("Обнаружены пересечения, задача не была добавлена");
+                return;
+            }
+        }
         Task existingTask = tasks.get(id);
         if (existingTask != null) {
             existingTask.setDescription(task.getDescription());
@@ -79,16 +107,24 @@ public class InMemoryTasksManager implements Manager {
 
     //    Удаление ранее добавленных задач — всех и по идентификатору.
     @Override
-    public void deleteTaskById(int id) {
-        if(memoryHistory.getHistory().contains(tasks.get(id))) {
-            memoryHistory.remove(id);
+    public String deleteTaskById(int id) {
+        try {
+            if (memoryHistory.getHistory().contains(tasks.get(id))) {
+                memoryHistory.remove(id);
+            }
+
+            tasks.remove(id);
+            return "Все задачи удалены";
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException("Несуществующий id");
         }
-        tasks.remove(id);
     }
 
     @Override
-    public void deleteAllTask() {
+    public String deleteAllTask() {
         tasks.clear();
+        memoryTasks.clear();
+        return "Все задачи удалены";
     }
 
     @Override
@@ -99,5 +135,11 @@ public class InMemoryTasksManager implements Manager {
     public void setTask(Task task) {
         tasks.put(task.getId(), task);
     }
+
+    public TreeSet<Task> getPrioritizedTasks() {
+        return sortedTasks;
+    }
+
+
 
 }

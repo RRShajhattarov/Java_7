@@ -1,12 +1,12 @@
 package manager;
 
-import type.Epic;
+import tasks.Epic;
 
 
-import type.Subtask;
+import tasks.Subtask;
 
 
-import type.Task;
+import tasks.Task;
 
 
 import java.util.*;
@@ -33,9 +33,9 @@ public interface Manager {
     void refreshTask(int id, Task task);
 
     //    Удаление ранее добавленных задач — всех и по идентификатору.
-    void deleteTaskById(int id);
+    String deleteTaskById(int id);
 
-    void deleteAllTask();
+    String deleteAllTask();
 
     List<Task> getHistory();
 }

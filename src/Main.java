@@ -1,32 +1,20 @@
-import manager.FileBackedTasksManager;
-import manager.InMemoryHistoryManager;
-import manager.InMemoryTasksManager;
-import type.Epic;
-import type.Subtask;
-import type.Task;
+import manager.HttpTaskManager;
+import manager.Manager;
+import manager.Managers;
+import network.HttpTaskServer;
+import server.KVServer;
 
-import java.io.File;
-import java.util.stream.Collectors;
-
+import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        String path = HttpTaskServer.getHttpPath();
 
-        Subtask subtask1 = new Subtask("subtask1","subtask1 example");
-        Subtask subtask2 = new Subtask("subtask2", "subtask2 example");
-        Subtask subtask3 = new Subtask("subtask3", "subtask3 example");
-        Epic epic1 = new Epic("epic1", "epic1 example");
-        Epic epic2 = new Epic("epic2", "epic2 example");
-        Task task1 = new Task("task1","task1 example");
+        Managers.getDefault(path);
 
-        FileBackedTasksManager ff = new FileBackedTasksManager();
-        ff.addTask(task1);
-        ff.getTaskById(task1.getId());
-        ff.saveHistory(ff.getHistory());
-        File file = new File("file.csv");
-        FileBackedTasksManager fb = FileBackedTasksManager.loadFromFile(file);
-        System.out.println(fb.getHistory());
+        HttpTaskServer httpTaskServer = new HttpTaskServer();
+        httpTaskServer.start();
 
 
         // epic1.addSubtask(subtask1);

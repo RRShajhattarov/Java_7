@@ -1,6 +1,6 @@
 package manager;
 
-import type.Task;
+import tasks.Task;
 import util.CustomList;
 import util.Node;
 
@@ -12,6 +12,7 @@ public interface HistoryManager {
     void remove(int id);
 
     List<Task> getHistory();
+
     CustomList<Node<Task>> getCustomList();
 
 }

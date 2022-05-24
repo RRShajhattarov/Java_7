@@ -1,6 +1,6 @@
 package manager;
 
-import type.Task;
+import tasks.Task;
 
 import util.CustomList;
 import util.Node;
@@ -34,19 +34,32 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return customList.getTasks(customList);
+        try {
+            return customList.getTasks(customList);
+        }
+        catch (NullPointerException nullPointerException) {
+            throw new NullPointerException("Пустой список!");
+        }
+    }
+    public void clear(InMemoryHistoryManager inMemoryHistory) {
+        historyNode.clear();
     }
 
     @Override
     public CustomList<Node<Task>> getCustomList() {
-        return customList;
+        try {
+            return customList;
+        }
+        catch (NullPointerException nullPointerException) {
+            throw new NullPointerException("Пустой лист!");
+        }
     }
 
     public static List<Integer> fromString(String value) { // Метод возвращает лист с id задач истории из файла
         String[] row = value.split(",");
         List<Integer> idHistory = new ArrayList<>();
         for (String val : row) {
-            idHistory.add(Integer.parseInt(val));
+            idHistory.add(Integer.parseInt(val.trim()));
         }
         return idHistory;
     }
