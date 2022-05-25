@@ -18,7 +18,7 @@ public class HttpTaskManager extends FileBackedTasksManager{
 
     }
 
-    public void save(String key, String json) throws IOException, InterruptedException {
+    public static void save(String key, String json) throws IOException, InterruptedException {
         kvClient.post(key, json);
     }
 

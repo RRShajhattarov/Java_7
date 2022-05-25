@@ -15,11 +15,10 @@ import java.nio.charset.StandardCharsets;
 
 public class TaskHandler extends HttpTaskManager implements HttpHandler {
     private String response = "Не найдено значений";
+    private final GsonBuilder gsonB = new GsonBuilder();
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-
-        GsonBuilder gsonB = new GsonBuilder();
         gsonB.setPrettyPrinting()
                 .serializeNulls();
         Gson gson = gsonB.create();
@@ -29,24 +28,12 @@ public class TaskHandler extends HttpTaskManager implements HttpHandler {
 
 
         switch (method) {
-            case "GET": {
-                getMethod(requestURI, gson);
+            case "GET" -> getMethod(requestURI, gson);
+            case "POST" -> postMethod(httpExchange, gson);
+            case "DELETE" -> deleteMethod(requestURI, gson, httpExchange);
+            default -> {
             }
-            break;
-            case "POST": {
-                postMethod(httpExchange, gson);
-            }
-            break;
-            case "DELETE": {
-                deleteMethod(requestURI, gson, httpExchange);
-            }
-            break;
-            default: {
-
-            }
-            break;
         }
-
         httpExchange.sendResponseHeaders(200, 0);
 
         try (OutputStream os = httpExchange.getResponseBody()) {
@@ -56,55 +43,54 @@ public class TaskHandler extends HttpTaskManager implements HttpHandler {
 
     private void getMethod(String requestURI, Gson gson)  {
         switch (requestURI) {
-            case "/tasks": {
+            case "/tasks":
                 response = gson.toJson(getPrioritizedTasks());
                 try {
                     save("historyKey", gson.toJson(memoryHistory.getHistory()));
                 } catch (IOException | InterruptedException e) {
                     System.out.println("Ошибка: " + e.getMessage());
                 }
-            }
             break;
-            case "/tasks/task": {
+
+            case "/tasks/task":
                 response = gson.toJson(getAllTask());
                 try {
                     save("historyKey", gson.toJson(memoryHistory.getHistory()));
                 } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
-            }
             break;
-            case "/tasks/epic": {
+
+            case "/tasks/epic":
                 response = gson.toJson(getAllEpic());
                 try {
                     save("historyKey", gson.toJson(memoryHistory.getHistory()));
                 } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
-            }
             break;
-            case "/tasks/subtask": {
+
+            case "/tasks/subtask":
                 response = gson.toJson(getAllSubtaskWithoutEpic());
                 try {
                     save("historyKey", gson.toJson(memoryHistory.getHistory()));
                 } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
-            }
             break;
-            case "/tasks/history": {
+
+            case "/tasks/history":
                 response = gson.toJson(getHistory());
                 try {
                     save("historyKey", gson.toJson(memoryHistory.getHistory()));
                 } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
-            }
             break;
-            default: {
-                response = "Ошибка запроса";
-            }
+
+            default: response = "Ошибка запроса";
             break;
+
         }
     }
 
