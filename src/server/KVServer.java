@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class KVServer {
 
     private void load(HttpExchange h) throws IOException {
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
+            gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
 
             Gson gson = gsonBuilder.create();
 

@@ -15,6 +15,8 @@ import static manager.HttpTaskManager.*;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,13 +26,22 @@ class HttpTaskManagerTest extends InMemoryTasksManager {
     HttpTaskServer httpTaskServer;
     Gson gson;
     Task task;
-    String json = "{\"label\": \"Задача 1\",\"description\": \"Описание задачи 1\",\"status\": " +
-            "\"NEW\",\"type\": \"TASK\",\"taskId\": 1,\"duration\": \"24\",\"startTime\": \"01.12.21\"}";
+    HashMap<Integer, Task> allTasks;
+    String json = "{" +
+            "  \"type\": \"TASK\",\n" +
+            "  \"name\": \"name1\",\n" +
+            "  \"description\": \"task1\",\n" +
+            "  \"taskId\": 234,\n" +
+            "  \"status\": \"NEW\",\n" +
+            "  \"duration\": 1200,\n" +
+            "  \"startTime\": \"25.05.22 12:20\"\n" +
+            "}";
 
     @BeforeEach
     void newGson() throws IOException, InterruptedException {
+        allTasks = new HashMap<>();
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter())
                 .setPrettyPrinting()
                 .serializeNulls();
         gson = gsonBuilder.create();
@@ -39,12 +50,9 @@ class HttpTaskManagerTest extends InMemoryTasksManager {
 
         httpTaskServer = new HttpTaskServer();
         httpTaskServer.start();
-
         task = gson.fromJson(json, Task.class);
-        tasks.put(task.getId(),task);
+        allTasks.put(task.getId(),task);
         save("tasks", gson.toJson(tasks));
-
-        tasks.clear();
 
         load(httpPath);
     }
@@ -57,12 +65,12 @@ class HttpTaskManagerTest extends InMemoryTasksManager {
 
     @Test
     void loadShouldRestoreTasks()  {
-        assertFalse(tasks.isEmpty());
+        assertFalse(allTasks.isEmpty());
     }
 
     @Test
     void shouldSaveTask() {
-        assertTrue(tasks.containsValue(task));
+        assertTrue(allTasks.containsValue(task));
     }
 
 }
